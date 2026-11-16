@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#183b32">
+  <title>Joulukalenteri</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --pine: #183b32;
+      --pine-light: #285447;
+      --berry: #a43838;
+      --gold: #d8b567;
+      --paper: #f5f1e7;
+      --ink: #24352e;
+      --muted: #68766d;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      color: var(--ink);
+      background-color: #dfeaf5;
+      background-image: linear-gradient(rgb(13 34 29 / 38%), rgb(13 34 29 / 25%)), url("https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=2000&q=85");
+      background-position: center top;
+      background-size: cover;
+      background-attachment: fixed;
+      font-family: "DM Sans", sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to bottom, rgb(255 255 255 / 0%) 0%, rgb(255 255 255 / 0%) 58%, rgb(255 255 255 / 15%) 76%, rgb(255 255 255 / 30%) 100%),
+        radial-gradient(2px 2px at 10% 20%, rgb(255 255 255 / 75%), transparent 100%),
+        radial-gradient(2px 2px at 30% 80%, rgb(255 255 255 / 80%), transparent 100%),
+        radial-gradient(2px 2px at 60% 30%, rgb(255 255 255 / 65%), transparent 100%),
+        radial-gradient(2px 2px at 75% 65%, rgb(255 255 255 / 75%), transparent 100%),
+        radial-gradient(2px 2px at 90% 40%, rgb(255 255 255 / 72%), transparent 100%);
+      background-size: 100% 100%, 220px 220px, 240px 240px, 260px 260px, 280px 280px, 300px 300px;
+      opacity: 0.9;
+      mix-blend-mode: screen;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0;
+      pointer-events: none;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    main {
+      margin: 0 auto;
+      width: 100%;
+      height: 100vh;
+      height: 100svh;
+    }
+
+    .grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .door {
+      position: absolute;
+      min-width: 0;
+      width: var(--door-size);
+      height: var(--door-size);
+      overflow: hidden;
+      border: 1px solid #d5c9ad;
+      border-radius: 50%;
+      background: #fffdf7;
+      box-shadow: inset 0 0 0 2px rgb(255 255 255 / 16%), 0 5px 14px rgb(0 0 0 / 24%);
+      break-inside: avoid;
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .door:not(.locked):hover {
+      transform: translateY(-3px) rotate(var(--tilt, 0deg));
+      box-shadow: 0 7px 16px rgb(46 57 45 / 13%);
+    }
+
+    .door-button {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      padding: 10px;
+      border: 0;
+      border-radius: inherit;
+      color: #fff8e8;
+      background-color: var(--pine-light);
+      background-image: radial-gradient(ellipse at 32% 24%, rgb(255 255 255 / 38%), transparent 34%), linear-gradient(145deg, transparent 48%, rgb(255 255 255 / 5%) 49%, transparent 52%);
+      box-shadow: inset -7px -9px 14px rgb(0 0 0 / 20%), inset 5px 5px 12px rgb(255 255 255 / 18%);
+      cursor: pointer;
+      font: inherit;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .door:nth-child(3n + 2) .door-button { background-color: var(--berry); }
+    .door:nth-child(4n) .door-button { background-color: #76552e; }
+
+    .door-button:disabled { cursor: default; }
+
+    .number {
+      display: block;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: min(50px, calc(var(--door-size) * 0.78));
+      line-height: 1;
+    }
+
+    .door.locked .door-button { opacity: 0.58; }
+
+    .door.open {
+      border: 4px solid rgb(255 255 255 / 86%);
+      box-shadow: 0 0 0 5px rgb(216 181 103 / 52%), 0 10px 22px rgb(0 0 0 / 18%), 0 0 26px rgb(216 181 103 / 38%);
+      transform: translateY(-6px) rotate(var(--tilt, 0deg));
+      transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
+    }
+
+    .door.open:not(.locked):hover {
+      transform: translateY(-10px) rotate(var(--tilt, 0deg));
+      box-shadow: 0 0 0 6px rgb(255 255 255 / 64%), 0 18px 30px rgb(0 0 0 / 24%), 0 0 32px rgb(216 181 103 / 44%);
+    }
+
+    .door.open .door-button {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      transform: translateY(-105%);
+      pointer-events: none;
+    }
+
+    .door.open:nth-child(8n + 1) { background: #9fd3aa; }
+    .door.open:nth-child(8n + 2) { background: #91c7d7; }
+    .door.open:nth-child(8n + 3) { background: #e5bd75; }
+    .door.open:nth-child(8n + 4) { background: #de9d9b; }
+    .door.open:nth-child(8n + 5) { background: #b3a5d2; }
+    .door.open:nth-child(8n + 6) { background: #8fc5b2; }
+    .door.open:nth-child(8n + 7) { background: #d3ad79; }
+    .door.open:nth-child(8n) { background: #9eadd9; }
+
+    .door-link, .missing-link {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      color: var(--pine);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+      text-align: center;
+      text-decoration-color: var(--gold);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+
+    .door.open .door-link, .door.open .missing-link { display: flex; }
+    .door.open .missing-link { color: var(--muted); font-size: 11px; font-weight: 500; }
+
+    .door-link {
+      flex-direction: column;
+      gap: 1px;
+      padding: 10px;
+      text-decoration: none;
+    }
+
+    .surprise-icon {
+      display: grid;
+      width: 1.3em;
+      aspect-ratio: 1;
+      place-items: center;
+      font-size: min(44px, calc(var(--door-size) * 0.72));
+      line-height: 1;
+      transition: transform 180ms ease;
+    }
+
+    .opened-day-number {
+      color: var(--pine);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .door-link:hover .surprise-icon {
+      transform: scale(1.08) rotate(-5deg);
+    }
+
+    .door-button:focus-visible, .door-link:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: -4px;
+    }
+
+    #video-popup {
+      width: min(900px, calc(100vw - 28px));
+      max-width: none;
+      max-height: calc(100vh - 28px);
+      margin: auto;
+      padding: 48px 12px 12px;
+      overflow: hidden;
+      border: 1px solid rgb(255 255 255 / 28%);
+      border-radius: 8px;
+      background: #183b32;
+      box-shadow: 0 20px 70px rgb(0 0 0 / 55%);
+    }
+
+    #video-popup::backdrop {
+      background: rgb(0 0 0 / 78%);
+      backdrop-filter: blur(4px);
+    }
+
+    .video-frame {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    .video-frame iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 4px;
+    }
+
+    .video-close {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1px solid rgb(255 255 255 / 30%);
+      border-radius: 50%;
+      color: #fff8e8;
+      background: rgb(255 255 255 / 10%);
+      cursor: pointer;
+      font: 28px/1 "DM Sans", sans-serif;
+    }
+
+    .video-close:hover { background: rgb(255 255 255 / 20%); }
+
+    @media (max-width: 640px) {
+      .number { font-size: min(42px, calc(var(--door-size) * 0.78)); }
+      #video-popup { padding: 44px 8px 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="grid" id="calendar" aria-label="Joulukalenterin luukut"></section>
+    
+  </main>
+
+  <dialog id="video-popup" aria-label="YouTube-video">
+    <button class="video-close" type="button" aria-label="Sulje video"><span aria-hidden="true">&times;</span></button>
+    <div class="video-frame">
+      <iframe id="video-player" width="560" height="315" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+  </dialog>
+
+  <script>
+    const surpriseIcons = ["🎄", "🎁", "⭐", "⛄", "🔔", "❄️", "🧦", "🦌", "🕯️", "🍬", "🍪", "🌲", "🛷", "🧤", "🧣", "🥁", "🎶", "🕊️", "🧝‍♂️", "🏠", "🧸", "🥛", "🎅", "✨"];
+    const timeFormatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Helsinki",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      minute: "numeric"
+    });
+    const calendar = document.querySelector("#calendar");
+    const videoPopup = document.querySelector("#video-popup");
+    const videoPlayer = document.querySelector("#video-player");
+    const videoClose = document.querySelector(".video-close");
+    const doors = [];
+    let links = new Map();
+
+    function currentHelsinkiTime() {
+      return Object.fromEntries(timeFormatter.formatToParts(new Date())
+        .filter(part => part.type !== "literal")
+        .map(part => [part.type, Number(part.value)]));
+    }
+
+    function validLink(value) {
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol) ? url.href : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function youtubeEmbedUrl(value) {
+      try {
+        const url = new URL(value);
+        const hosts = ["youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"];
+        let videoId;
+
+        if (url.hostname === "youtu.be") {
+          videoId = url.pathname.slice(1).split("/")[0];
+        } else if (hosts.includes(url.hostname)) {
+          videoId = url.searchParams.get("v") || url.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/)?.[1];
+        }
+
+        return videoId && /^[\w-]{11}$/.test(videoId)
+          ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`
+          : null;
+      } catch {
+        return null;
+      }
+    }
+
+    videoClose.addEventListener("click", () => {
+      videoPopup.close();
+      videoPlayer.src = "about:blank";
+    });
+    videoPopup.addEventListener("close", () => {
+      videoPlayer.src = "about:blank";
+    });
+    videoPopup.addEventListener("click", event => {
+      if (event.target === videoPopup) videoPopup.close();
+    });
+
+    function renderDoors() {
+      const now = currentHelsinkiTime();
+
+      doors.forEach(({ article, button, link, missing, day }) => {
+        const passed = now.month > 11 || (now.month === 11 && now.day > day);
+        const unlocked = passed || (now.month === 11 && now.day === day && now.minute >= 1);
+        const href = links.get(day);
+        if (passed) article.classList.add("open");
+        article.classList.toggle("locked", !unlocked);
+        button.disabled = !unlocked || passed;
+        button.setAttribute("aria-label", passed
+          ? `Luukku ${day}, avattu`
+          : unlocked
+            ? `Avaa luukku ${day}`
+            : `Luukku ${day}, avautuu ${day}. marraskuuta klo 00.01`);
+
+        if (href) {
+          link.href = href;
+          link.setAttribute("aria-label", youtubeEmbedUrl(href)
+            ? `Toista luukun ${day} video`
+            : `Avaa luukun ${day} linkki uudessa välilehdessä`);
+          link.hidden = false;
+          missing.hidden = true;
+        } else {
+          link.hidden = true;
+          missing.hidden = false;
+        }
+      });
+    }
+
+    function placeDoors() {
+      const width = calendar.clientWidth;
+      const height = calendar.clientHeight;
+      if (!width || !height) return;
+
+      const padding = 8;
+      const baseSize = Math.min(104, Math.max(44, width / 7.2));
+      let layout;
+
+      for (let size = baseSize; size >= 36 && !layout; size -= 4) {
+        const gap = Math.max(6, size * 0.16);
+        const positions = [];
+
+        for (const { article } of doors) {
+          let position;
+          for (let attempt = 0; attempt < 3000; attempt++) {
+            const x = padding + Math.random() * Math.max(0, width - size - padding * 2);
+            const y = padding + Math.random() * Math.max(0, height - size - padding * 2);
+            const clear = positions.every(other =>
+              x + size + gap <= other.x || other.x + size + gap <= x ||
+              y + size + gap <= other.y || other.y + size + gap <= y);
+            if (clear) {
+              position = { article, x, y };
+              break;
+            }
+          }
+          if (!position) break;
+          positions.push(position);
+        }
+
+        if (positions.length === doors.length) {
+          calendar.style.setProperty("--door-size", `${size}px`);
+          layout = positions;
+        }
+      }
+
+      if (!layout) return;
+      layout.forEach(({ article, x, y }) => {
+        article.style.left = `${x}px`;
+        article.style.top = `${y}px`;
+      });
+    }
+
+    const days = Array.from({ length: 24 }, (_, index) => index + 1);
+    for (let index = days.length - 1; index > 0; index--) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [days[index], days[randomIndex]] = [days[randomIndex], days[index]];
+    }
+
+    for (const day of days) {
+      const article = document.createElement("article");
+      article.className = "door locked";
+      article.style.setProperty("--tilt", `${(Math.random() * 6 - 3).toFixed(1)}deg`);
+
+      const button = document.createElement("button");
+      button.className = "door-button";
+      button.type = "button";
+      button.disabled = true;
+      button.innerHTML = `<span class="number">${day}</span>`;
+      button.addEventListener("click", () => {
+        article.classList.add("open");
+        article.querySelector(".door-link, .missing-link")?.focus?.();
+      });
+
+      const link = document.createElement("a");
+      link.className = "door-link";
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.innerHTML = `<span class="surprise-icon" aria-hidden="true">${surpriseIcons[day - 1]}</span><span class="opened-day-number" aria-hidden="true">${day}</span>`;
+      link.title = "Avaa päivän yllätys";
+      link.setAttribute("aria-label", `Avaa luukun ${day} linkki uudessa välilehdessä`);
+      link.addEventListener("click", event => {
+        const embedUrl = youtubeEmbedUrl(link.href);
+        if (!embedUrl) return;
+        event.preventDefault();
+        videoPlayer.title = `Luukun ${day} YouTube-video`;
+        videoPlayer.src = embedUrl;
+        videoPopup.showModal();
+      });
+
+      const missing = document.createElement("span");
+      missing.className = "missing-link";
+      missing.setAttribute("aria-label", `Luukulla ${day} ei ole linkkiä`);
+      missing.tabIndex = -1;
+
+      article.append(button, link, missing);
+      calendar.append(article);
+      doors.push({ article, button, link, missing, day });
+    }
+
+    placeDoors();
+    let layoutFrame;
+    window.addEventListener("resize", () => {
+      cancelAnimationFrame(layoutFrame);
+      layoutFrame = requestAnimationFrame(placeDoors);
+    });
+
+    fetch("./linkit.txt", { cache: "no-store" })
+      .then(response => {
+        if (!response.ok) throw new Error("Linkkitiedoston lataus epäonnistui");
+        return response.text();
+      })
+      .then(text => {
+        text.split(/\r?\n/).forEach(line => {
+          const match = line.match(/^\s*(\d{1,2})\s*=\s*(.*?)\s*$/);
+          if (!match) return;
+          const day = Number(match[1]);
+          const href = validLink(match[2]);
+          if (day >= 1 && day <= 24 && href) links.set(day, href);
+        });
+        renderDoors();
+      })
+      .catch(() => {
+        renderDoors();
+      });
+
+    renderDoors();
+    setInterval(renderDoors, 10_000);
+  </script>
+</body>
+</html>
